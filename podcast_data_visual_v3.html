@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Colección de Dashboards del Conflicto v3</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* General Styles */
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; line-height: 1.6; margin: 0; padding: 20px; background-color: #f0f2f5; color: #333; }
+        .main-container { max-width: 1400px; margin: auto; }
+        h1.main-title { text-align: center; color: #2c3e50; margin-bottom: 30px; }
+        details { border: 1px solid #ccc; border-radius: 8px; margin-bottom: 20px; background-color: #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.1); overflow: hidden; }
+        summary { font-weight: bold; font-size: 1.3em; padding: 20px; background-color: #f7f7f7; cursor: pointer; outline: none; }
+        .content-container { padding: 20px; }
+
+        /* Styles for Mind Map (Dashboard 1) */
+        .mind-map-body { background-color: #f0f2f5; }
+        .mind-map { display: flex; flex-direction: column; align-items: center; gap: 40px; }
+        .central-topic { background-color: #2c3e50; color: white; padding: 20px 30px; border-radius: 50px; font-size: 28px; font-weight: bold; text-align: center; box-shadow: 0 10px 20px rgba(0,0,0,0.15); border: 3px solid #34495e; }
+        .main-branches { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; width: 100%; }
+        .branch { background-color: white; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        .branch-title { color: white; padding: 15px; font-size: 20px; font-weight: bold; }
+        .branch-content { padding: 20px; display: flex; flex-direction: column; gap: 15px; }
+        .sub-branch, .leaf { background-color: #f8f9fa; padding: 12px; border-radius: 8px; border-left: 4px solid; }
+        .sub-branch-title { font-weight: bold; margin-bottom: 5px; color: #495057; }
+        .branch ul { margin: 0; padding-left: 20px; } .branch li { margin-bottom: 8px; }
+        #branch1 .branch-title { background-color: #16a085; } #branch1 .sub-branch, #branch1 .leaf { border-color: #16a085; }
+        #branch2 .branch-title { background-color: #2980b9; } #branch2 .sub-branch, #branch2 .leaf { border-color: #2980b9; }
+        #branch3 .branch-title { background-color: #8e44ad; } #branch3 .sub-branch, #branch3 .leaf { border-color: #8e44ad; }
+        #branch4 .branch-title { background-color: #f39c12; } #branch4 .sub-branch, #branch4 .leaf { border-color: #f39c12; }
+        #branch5 .branch-title { background-color: #d35400; } #branch5 .sub-branch, #branch5 .leaf { border-color: #d35400; }
+        #branch6 .branch-title { background-color: #c0392b; } #branch6 .sub-branch, #branch6 .leaf { border-color: #c0392b; }
+        #branch7 .branch-title { background-color: #7f8c8d; } #branch7 .sub-branch, #branch7 .leaf { border-color: #7f8c8d; }
+
+        /* Styles for Dark Dashboards (2) */
+        .dark-body { background-color: #1a1a2e; color: #e0e0e0; padding: 20px; border-radius: 6px; }
+        .dark-body h1, .dark-body h2 { color: #e94560; }
+        .dark-card { background-color: #16213e; border-radius: 15px; padding: 20px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); border: 1px solid #0f3460; }
+        .dark-card-title { font-size: 1.5em; margin-bottom: 15px; color: #e94560; border-bottom: 2px solid #e94560; padding-bottom: 10px; }
+        .stat-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #0f3460; }
+        .stat-item:last-child { border-bottom: none; }
+        .stat-label { font-size: 1.1em; }
+        .stat-value { font-size: 1.2em; font-weight: bold; color: #53a8b6; }
+        .stat-value.israel { color: #ffc107; }
+        .stat-value.palestine { color: #28a745; }
+        .dark-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 25px; }
+
+        /* Styles for Light Dashboard (3) */
+        .light-body { background-color: #f4f7f9; color: #333; padding: 25px; border-radius: 6px; }
+        .light-body h1 { color: #2c3e50; font-size: 2.8em; margin-bottom: 10px; font-weight: 700; }
+        .light-body h2.subtitle { color: #7f8c8d; font-size: 1.2em; margin-bottom: 40px; font-weight: 300; }
+        .light-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 25px; }
+        .light-card { background-color: #ffffff; border-radius: 8px; padding: 25px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); display: flex; flex-direction: column; }
+        .light-card.highlight-gaza { grid-column: 1 / -1; background-color: #fff5f5; border-left: 5px solid #e74c3c; }
+        .light-card-title { font-size: 1.6em; margin-bottom: 20px; color: #2c3e50; font-weight: 700; }
+        .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 20px; }
+        .kpi { text-align: center; padding: 15px; background: #f8f9fa; border-radius: 6px; }
+        .kpi-value { font-size: 2.2em; font-weight: 700; color: #e74c3c; }
+        .kpi-label { font-size: 0.9em; color: #555; }
+        .light-list-item { padding: 10px 0; border-bottom: 1px solid #ecf0f1; }
+        .light-list-item:last-child { border-bottom: none; }
+        .chart-container { min-height: 300px; position: relative; }
+
+        /* Styles for Dark Themed Charts (Dashboard 4) */
+        .dark-theme-body { background-color: #121212; color: #e0e0e0; padding: 20px; border-radius: 6px; }
+        .dark-theme-body h1 { color: #bb86fc; text-align: center; }
+        .dark-theme-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 30px; }
+        .dark-theme-card { background-color: #1e1e1e; padding: 25px; border-radius: 12px; box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4); }
+        .dark-theme-card h2 { text-align: center; color: #03dac6; margin-bottom: 25px; }
+
+        /* Styles for Fuentes */
+        .fuentes-container { padding: 20px; margin-top: 30px; background-color: #fff; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .fuentes-container h2 { color: #2c3e50; border-bottom: 1px solid #ddd; padding-bottom: 10px; }
+        .fuentes-container ul { list-style-type: disc; padding-left: 20px; }
+        .fuentes-container li { margin-bottom: 10px; }
+        .fuentes-container a { color: #007bff; text-decoration: none; }
+        .fuentes-container a:hover { text-decoration: underline; }
+
+        /* Styles for Famine Dashboard (5) */
+        .famine-body { font-family: 'Nunito', sans-serif; background-color: #fef9f8; color: #4f4f4f; padding: 20px; border-radius: 6px; }
+        .famine-body h1 { font-size: 3em; font-weight: 900; color: #d9534f; margin-bottom: 10px; }
+        .famine-body h2 { font-size: 1.8em; font-weight: 700; color: #5bc0de; margin-bottom: 25px; text-align: center; }
+        .famine-body p { font-size: 1.2em; color: #777; text-align: center; }
+        .famine-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; }
+        .kpi-card-famine { background-color: #fff; padding: 25px; border-radius: 12px; box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08); text-align: center; border-top: 5px solid #f0ad4e; }
+        .kpi-card-famine .value { font-size: 3.5em; font-weight: 900; color: #d9534f; }
+        .kpi-card-famine .label { font-size: 1.1em; font-weight: 700; color: #555; }
+        .chart-card-famine { background-color: #fff; padding: 25px; border-radius: 12px; box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08); }
+
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <h1 class="main-title">Todo sobre el Conflicto Israel-Palestina</h1>
+
+        <details>
+            <summary>1. Mapa Mental: Conflicto Israelí-Palestino</summary>
+            <div class="content-container mind-map-body">
+                 <div class="mind-map">
+                    <div class="central-topic">Conflicto Israelí-Palestino</div>
+                    <div class="main-branches">
+                        <div class="branch" id="branch1"><div class="branch-title">Naturaleza y Origen</div><div class="branch-content"><div class="sub-branch"><div class="sub-branch-title">Conflicto Social y Armado</div>Por el control de la región histórica de Palestina, desde principios del siglo XX.</div><div class="sub-branch"><div class="sub-branch-title">Raíces Históricas</div><ul><li><b>Sionismo:</b> Fin del s. XIX, movimiento para establecer una patria judía en Palestina.</li><li><b>Nacionalismo Palestino:</b> Basado en siglos de presencia musulmana y la expulsión de 1948 (Nakba).</li></ul></div></div></div>
+                        <div class="branch" id="branch2"><div class="branch-title">Actores Principales</div><div class="branch-content"><div class="sub-branch"><div class="sub-branch-title">Israel</div>Gobierno, Fuerzas de Defensa (FDI), partidos como Likud y Laborista.</div><div class="sub-branch"><div class="sub-branch-title">Palestina</div><ul><li><b>Autoridad Nacional Palestina (ANP) / Fatah:</b> Predomina en Cisjordania.</li><li><b>Hamás:</b> Controla la Franja de Gaza desde 2007.</li><li>Otros grupos: Yihad Islámica, FPLP.</li></ul></div><div class="sub-branch"><div class="sub-branch-title">Actores Internacionales</div>ONU, UE, EE.UU., Rusia, Liga Árabe, Egipto, ONGs.</div></div></div>
+                        <div class="branch" id="branch3"><div class="branch-title">Fases Históricas Clave</div><div class="branch-content"><div class="leaf"><b>Mandato Británico (1917-1947):</b> Declaración Balfour.</div><div class="leaf"><b>Partición ONU y Guerra (1948):</b> Creación de Israel, Nakba.</div><div class="leaf"><b>Guerra de los Seis Días (1967):</b> Ocupación de Gaza, Cisjordania, etc.</div><div class="leaf"><b>Primera Intifada (1987-1993):</b> Levantamiento palestino.</div><div class="leaf"><b>Proceso de Paz de Oslo (1993):</b> Reconocimiento mutuo OLP-Israel.</div><div class="leaf"><b>Segunda Intifada (2000-2005):</b> Levantamiento más violento.</div><div class="leaf"><b>Bloqueo de Gaza (desde 2007):</b> Crisis humanitaria.</div><div class="leaf"><b>Guerra Israel-Gaza (2023-presente):</b> Miles de muertos y desplazados.</div></div></div>
+                        <div class="branch" id="branch4"><div class="branch-title">Puntos de Disputa</div><div class="branch-content"><div class="leaf"><b>Fronteras y Territorio:</b> Sin definir.</div><div class="leaf"><b>Estatus de Jerusalén:</b> Reclamada por ambos como capital.</div><div class="leaf"><b>Asentamientos Israelíes:</b> Considerados ilegales internacionalmente.</div><div class="leaf"><b>Derecho de Retorno:</b> Refugiados palestinos de 1948.</div><div class="leaf"><b>Seguridad:</b> Preocupaciones de ambas partes.</div><div class="leaf"><b>Recursos Hídricos:</b> Control y distribución.</div></div></div>
+                        <div class="branch" id="branch5"><div class="branch-title">Propuestas de Solución</div><div class="branch-content"><div class="sub-branch"><div class="sub-branch-title">Solución de Dos Estados</div>Creación de un Estado de Palestina independiente junto a Israel. Apoyada por la ONU como la única viable.</div><div class="sub-branch"><div class="sub-branch-title">Solución de Un Estado</div>Un solo estado binacional con igualdad de derechos. Desafío demográfico para Israel.</div><div class="sub-branch"><div class="sub-branch-title">Solución de Tres Estados</div>Separar Gaza y Cisjordania. Inaceptable para los palestinos.</div></div></div>
+                        <div class="branch" id="branch6"><div class="branch-title">Impacto Humanitario y DDHH</div><div class="branch-content"><div class="leaf"><b>Víctimas Civiles:</b> Altas cifras, especialmente mujeres y niños en Gaza.</div><div class="leaf"><b>Desplazamiento Forzado:</b> 1.9 millones en Gaza (2023-presente).</div><div class="leaf"><b>Crisis Humanitaria en Gaza:</b> Bloqueo, escasez y hambruna.</div><div class="leaf"><b>Ataques Indiscriminados:</b> Cohetes palestinos y artillería israelí.</div><div class="leaf"><b>Restricciones de Movimiento:</b> Afectan la vida diaria de los palestinos.</div><div class="leaf"><b>Impunidad:</b> Falta de justicia para las víctimas de ambos lados.</div></div></div>
+                        <div class="branch" id="branch7"><div class="branch-title">Perspectivas y Sentimientos</div><div class="branch-content"><div class="leaf"><b>Desconfianza Mutua:</b> Miedo a la eliminación vs. miedo a la expansión.</div><div class="leaf"><b>Frustración y Desesperación:</b> Comunes en la población palestina.</div><div class="leaf"><b>Deseo de Paz:</b> Aspiración mayoritaria en ambos pueblos a un acuerdo.</div></div></div>
+                    </div>
+                </div>
+            </div>
+        </details>
+
+        <details>
+            <summary>2. Dashboard Comparativo: Conflicto Israelí-Palestino</summary>
+            <div class="content-container dark-body">
+                <h1>Dashboard Comparativo (desde Oct. 2023)</h1>
+                <div class="dark-grid">
+                    <div class="dark-card"><h2 class="dark-card-title">Víctimas Totales</h2><div class="chart-container"><canvas id="victimasChart"></canvas></div></div>
+                    <div class="dark-card"><h2 class="dark-card-title">Detalles de Bajas (Palestina)</h2><div class="stat-item"><span class="stat-label">Muertos en Gaza</span><span class="stat-value palestine">+57,418</span></div><div class="stat-item"><span class="stat-label">Niños muertos en Gaza</span><span class="stat-value palestine">+17,400</span></div><div class="stat-item"><span class="stat-label">Mujeres muertas en Gaza</span><span class="stat-value palestine">+10,000</span></div><div class="stat-item"><span class="stat-label">Heridos en Gaza</span><span class="stat-value palestine">+136,261</span></div><div class="stat-item"><span class="stat-label">Muertos en Cisjordania</span><span class="stat-value palestine">+1,004</span></div></div>
+                    <div class="dark-card"><h2 class="dark-card-title">Detalles de Bajas (Israel)</h2><div class="stat-item"><span class="stat-label">Muertos (Ataques 7 Oct)</span><span class="stat-value israel">1,139</span></div><div class="stat-item"><span class="stat-label">Civiles muertos (7 Oct)</span><span class="stat-value israel">695</span></div><div class="stat-item"><span class="stat-label">Militares muertos (desde invasión)</span><span class="stat-value israel">+508</span></div><div class="stat-item"><span class="stat-label">Civiles muertos en Cisjordania</span><span class="stat-value israel">24</span></div></div>
+                    <div class="dark-card"><h2 class="dark-card-title">Infraestructura Afectada en Gaza</h2><div class="chart-container"><canvas id="infraestructuraChart"></canvas></div></div>
+                </div>
+            </div>
+        </details>
+
+        <details open>
+            <summary>3. Dashboard de Víctimas del Conflicto</summary>
+            <div class="content-container light-body">
+                <h1>Patrones y Cifras de Víctimas del Conflicto</h1>
+                <h2 class="subtitle">Análisis detallado por territorio y grupo afectado (Datos hasta Julio 2025)</h2>
+                <div class="light-grid">
+                    <div class="light-card highlight-gaza"><h2 class="light-card-title">Epicentro de la Crisis: Franja de Gaza (2023-Presente)</h2><div class="kpi-grid"><div class="kpi"><div class="kpi-value">+57,418</div><div class="kpi-label">Palestinos Muertos</div></div><div class="kpi"><div class="kpi-value">+136,261</div><div class="kpi-label">Heridos</div></div><div class="kpi"><div class="kpi-value">1.9M</div><div class="kpi-label">Desplazados (>75% pop.)</div></div><div class="kpi"><div class="kpi-value">~62,413</div><div class="kpi-label">Muertes por Inanición</div></div></div><div class="chart-container"><canvas id="gazaVictimsChart"></canvas></div></div>
+                    <div class="light-card"><h2 class="light-card-title">Víctimas por Grupo Específico</h2><div class="chart-container"><canvas id="specialGroupsChart"></canvas></div></div>
+                    <div class="light-card"><h2 class="light-card-title">Impacto Regional Extendido</h2><div class="chart-container"><canvas id="regionalImpactChart"></canvas></div></div>
+                </div>
+            </div>
+        </details>
+
+        <details>
+            <summary>4. Análisis Comparativo de Víctimas Palestinas</summary>
+            <div class="content-container dark-theme-body">
+                <header><h1>Análisis Comparativo de Víctimas Palestinas</h1></header>
+                <div class="dark-theme-grid">
+                    <div class="dark-theme-card"><h2>Combatientes vs. Civiles</h2><div class="chart-container"><canvas id="combatantsVsCiviliansChart"></canvas></div></div>
+                    <div class="dark-theme-card"><h2>Combatientes vs. Niños</h2><div class="chart-container"><canvas id="combatantsVsChildrenChart"></canvas></div></div>
+                </div>
+            </div>
+        </details>
+
+        <details>
+            <summary>5. 20 preguntas incomodas del Conflicto israeli-palestino</summary>
+            <div class="content-container">
+                <iframe src="respuestas_impactantes.html" style="width:100%; height:800px; border:none;"></iframe>
+            </div>
+        </details>
+
+        <div class="fuentes-container">
+            <h2>Fuentes de Datos</h2>
+            <ul>
+                <li><a href="https://www.hrw.org/es/world-report/2024/country-chapters/israel-and-palestine" target="_blank">Informe Mundial 2024: Israel y Palestina | Human Rights Watch</a></li>
+                <li><a href="https://www.hrw.org/es/middle-east/north-africa/israel/palestine" target="_blank">Israel / Territorios Palestinos Ocupados (TPO) | Human Rights Watch</a></li>
+                <li><a href="https://www.amnesty.org.ar/israel-y-los-territorios-ocupados-un-camino-a-ninguna-parte/" target="_blank">Israel y los Territorios Ocupados: Un camino a ninguna parte - Amnistía Internacional Argentina</a></li>
+                <li><a href="https://es.wikipedia.org/wiki/Conflicto_israel%C3%AD-palestino" target="_blank">Conflicto israelí-palestino - Wikipedia, la enciclopedia libre</a></li>
+                <li><a href="https://es.wikipedia.org/wiki/V%C3%ADctimas_de_la_guerra_Israel-Gaza_(2023-presente)" target="_blank">Víctimas de la guerra Israel-Gaza (2023-presente) - Wikipedia, la enciclopedia libre</a></li>
+                <li><a href="https://www.unicef.org/es/emergencias/ninos-ninas-gaza-necesitan-ayuda-emergencia-desesperadamente" target="_blank">Los niños y niñas de Gaza necesitan ayuda de emergencia | UNICEF</a></li>
+                <li><a href="https://www.infobae.com/america/mundo/2024/02/18/susurrando-en-gaza-los-testimonios-de-la-vida-de-los-palestinos-bajo-la-amenaza-de-hamas/" target="_blank">“Susurrando en Gaza”: los testimonios de la vida de los palestinos bajo la amenaza de Hamas - Infobae</a></li>
+                <li>Textos proporcionados sobre el conflicto y testimonios de rehenes.</li>
+            </ul>
+        </div>
+
+    </div>
+
+    <script>
+    const chartInstances = {};
+
+    function initChartsInDetail(detailElement) {
+        const canvases = detailElement.querySelectorAll('canvas');
+        canvases.forEach(canvas => {
+            const chartId = canvas.id;
+            if (chartInstances[chartId]) {
+                chartInstances[chartId].destroy();
+            }
+            switch (chartId) {
+                case 'victimasChart':
+                    chartInstances[chartId] = new Chart(canvas.getContext('2d'), { type: 'bar', data: { labels: ['Palestina (Gaza)', 'Israel (Total)'], datasets: [{ label: 'Muertes Totales', data: [57418, 1647], backgroundColor: ['#28a745', '#ffc107'] }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, title: { display: true, text: 'Comparación de Muertes Totales', color: '#e0e0e0', font: {size: 16} } }, scales: { y: { beginAtZero: true, ticks: { color: '#e0e0e0' } }, x: { ticks: { color: '#e0e0e0' } } } } });
+                    break;
+                case 'infraestructuraChart':
+                    chartInstances[chartId] = new Chart(canvas.getContext('2d'), { type: 'doughnut', data: { labels: ['Instalaciones Sanitarias', 'Escuelas', 'Infraestructura de Agua'], datasets: [{ label: 'Infraestructura Dañada/Destruida en Gaza (%)', data: [80, 57, 66], backgroundColor: ['#d35400', '#8e44ad', '#2980b9'], borderColor: '#1a1a2e', borderWidth: 2 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top', labels: { color: '#e0e0e0' } }, title: { display: true, text: 'Infraestructura Crítica Afectada en Gaza (%)', color: '#e0e0e0', font: {size: 16} } } } });
+                    break;
+                case 'gazaVictimsChart':
+                    chartInstances[chartId] = new Chart(canvas.getContext('2d'), { type: 'bar', data: { labels: ['Niños', 'Mujeres', 'Otros Civiles', 'Combatientes (Est.)'], datasets: [{ label: 'Muertos en Gaza', data: [17400, 10000, 18454, 11484], backgroundColor: ['#e74c3c', '#c0392b', '#f39c12', '#d35400'] }] }, options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, title: { display: true, text: 'Composición de las víctimas mortales en Gaza', font: { size: 16 } } } } });
+                    break;
+                case 'specialGroupsChart':
+                    chartInstances[chartId] = new Chart(canvas.getContext('2d'), { type: 'doughnut', data: { labels: ['Periodistas', 'Personal UNRWA', 'Trabajadores Sanitarios (Líbano)', 'Personal MSF', 'World Central Kitchen'], datasets: [{ label: 'Muertes', data: [185, 152, 222, 16, 7], backgroundColor: ['#16a085', '#1abc9c', '#27ae60', '#2ecc71', '#f1c40f'] }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top' }, title: { display: true, text: 'Trabajadores de Medios y Ayuda Humanitaria Muertos', font: { size: 16 } } } } });
+                    break;
+                case 'regionalImpactChart':
+                    chartInstances[chartId] = new Chart(canvas.getContext('2d'), { type: 'bar', data: { labels: ['Líbano', 'Irán', 'Yemen'], datasets: [{ label: 'Muertes por ataques vinculados al conflicto', data: [4047, 935, 106], backgroundColor: ['#2980b9', '#3498db', '#8e44ad'] }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, title: { display: true, text: 'Muertes en otros países', font: { size: 16 } } } } });
+                    break;
+                case 'combatantsVsCiviliansChart':
+                    chartInstances[chartId] = new Chart(canvas.getContext('2d'), { type: 'doughnut', data: { labels: ['Civiles (Mujeres, Niños y Otros)', 'Combatientes (Estimado)'], datasets: [{ data: [45854, 11484], backgroundColor: ['#cf6679', '#bb86fc'], borderColor: '#121212', borderWidth: 4 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top', labels: { color: '#e0e0e0', font: { size: 14 } } }, title: { display: true, text: 'Proporción de Muertes en Gaza', color: '#e0e0e0', font: { size: 18 } } } } });
+                    break;
+                case 'combatantsVsChildrenChart':
+                    chartInstances[chartId] = new Chart(canvas.getContext('2d'), { type: 'bar', data: { labels: ['Tipo de Víctima'], datasets: [ { label: 'Niños Muertos', data: [17400], backgroundColor: '#03dac6', borderWidth: 2 }, { label: 'Combatientes Muertos (Estimado)', data: [11484], backgroundColor: '#bb86fc', borderWidth: 2 } ] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, ticks: { color: '#e0e0e0' }, grid: { color: 'rgba(224, 224, 224, 0.1)' } }, x: { ticks: { color: '#e0e0e0' } } }, plugins: { legend: { position: 'top', labels: { color: '#e0e0e0', font: { size: 14 } } }, title: { display: true, text: 'Comparación de Niños vs. Combatientes Muertos', color: '#e0e0e0', font: { size: 18 } } } } });
+                    break;
+                case 'victimasInanicionChart':
+                    chartInstances[chartId] = new Chart(canvas.getContext('2d'), { type: 'pie', data: { labels: ['Niños', 'Adultos (No especificado)'], datasets: [{ data: [50, 2], backgroundColor: ['#d9534f', '#f0ad4e'], borderColor: '#fef9f8', borderWidth: 4 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top', labels: { font: { size: 14, weight: 'bold' } } }, title: { display: true, text: 'Distribución de Muertes Confirmadas por Hambre', font: { size: 18, weight: 'bold' } } } } });
+                    break;
+                case 'malnutricionChart':
+                    chartInstances[chartId] = new Chart(canvas.getContext('2d'), { type: 'bar', data: { labels: ['Niños en riesgo de muerte', 'Niños con desnutrición severa', 'Niños < 2 años con desnutrición aguda (Norte)'], datasets: [{ label: 'Número de Personas', data: [3000, 60000, 15.6], backgroundColor: ['#5bc0de', '#5cb85c', '#d9534f'] }] }, options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y', scales: { x: { beginAtZero: true, ticks: { font: { size: 12 } } }, y: { ticks: { font: { size: 14, weight: 'bold' } } } }, plugins: { legend: { display: false }, title: { display: true, text: 'Población Infantil Afectada', font: { size: 18, weight: 'bold' } } } } });
+                    break;
+            }
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('details').forEach(detail => {
+            detail.addEventListener('toggle', () => {
+                if (detail.open) {
+                    setTimeout(() => initChartsInDetail(detail), 50);
+                }
+            });
+        });
+
+        document.querySelectorAll('details[open]').forEach(detail => {
+            initChartsInDetail(detail);
+        });
+    });
+    </script>
+</body>
+</html>
